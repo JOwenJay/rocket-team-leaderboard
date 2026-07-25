@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipo Rocket - Leaderboard</title>
+  <!-- Tailwind CSS para el diseño -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PapaParse para leer el CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body class="bg-slate-950 text-white font-sans min-h-screen p-4 md:p-8">
+
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <header class="flex items-center gap-4 mb-8 border-b-2 border-red-600/80 pb-4">
+      <div class="bg-red-600 text-slate-950 font-black text-4xl w-14 h-14 flex items-center justify-center rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+        R
+      </div>
+      <div>
+        <h1 class="text-3xl md:text-4xl font-black text-red-500 tracking-wider">EQUIPO ROCKET</h1>
+        <p class="text-slate-400 text-sm">Clasificación de Miembros y Target Semanal</p>
+      </div>
+    </header>
+
+    <!-- Contenedor del Leaderboard -->
+    <div class="bg-slate-900/90 rounded-xl p-6 border border-slate-800 shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-slate-200">Rendimiento Semanal</h2>
+        <span class="bg-red-950 text-red-400 border border-red-800 text-xs px-3 py-1 rounded-full font-mono uppercase tracking-wider">
+          Semana Activa
+        </span>
+      </div>
+
+      <!-- Filas de Miembros -->
+      <div id="leaderboard" class="space-y-4">
+        <p class="text-slate-500 text-center py-8">Cargando datos del equipo...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Targets Semanales (Día x 5)
+    const TARGETS = {
+      'PA1': 150 * 5, // 750 tasks
+      'PA2': 170 * 5  // 850 tasks
+    };
+
+    // Leer el archivo local datos.csv
+    fetch('datos.csv')
+      .then(res => res.text())
+      .then(csvText => {
+        Papa.parse(csvText, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (results) => renderLeaderboard(results.data)
+        });
+      })
+      .catch(err => {
+        document.getElementById('leaderboard').innerHTML = 
+          `<p class="text-red-400 text-center py-4">Error al cargar datos.csv. Asegúrate de usar Live Server.</p>`;
+      });
+
+    function renderLeaderboard(data) {
+      const miembros = data.map(m => {
+        const target = TARGETS[m.Rol] || 750;
+        const completadas = m.TasksCompletadas || 0;
+        const faltantes = Math.max(0, target - completadas);
+        const porcentaje = Math.min(100, Math.round((completadas / target) * 100));
+
+        return { ...m, target, completadas, faltantes, porcentaje };
+      });
+
+      // Ordenar de mayor a menor
+      miembros.sort((a, b) => b.completadas - a.completadas);
+
+      const container = document.getElementById('leaderboard');
+      container.innerHTML = '';
+
+      miembros.forEach((m, index) => {
+        const pos = index + 1;
+        let posBadge = `<span class="text-slate-500 font-mono font-bold w-6 text-center">#${pos}</span>`;
+        if (pos === 1) posBadge = `<span class="text-xl w-6 text-center">🥇</span>`;
+        if (pos === 2) posBadge = `<span class="text-xl w-6 text-center">🥈</span>`;
+        if (pos === 3) posBadge = `<span class="text-xl w-6 text-center">🥉</span>`;
+
+        const statusText = m.faltantes === 0 
+          ? `<span class="text-emerald-400 font-bold">¡Target Cumplido! 🎉</span>`
+          : `<span class="text-slate-400">Faltan: <strong class="text-slate-200">${m.faltantes}</strong></span>`;
+
+        container.innerHTML += `
+          <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 hover:border-red-600/40 transition flex flex-col md:flex-row items-center gap-4">
+            <div class="flex items-center gap-3 w-full md:w-1/3">
+              ${posBadge}
+              <div>
+                <p class="font-bold text-slate-100 text-lg">${m.Nombre}</p>
+                <span class="text-[10px] font-mono bg-slate-800 text-red-400 px-2 py-0.5 rounded border border-slate-700">${m.Rol}</span>
+              </div>
+            </div>
+
+            <div class="w-full md:w-2/3 space-y-1.5">
+              <div class="flex justify-between text-xs md:text-sm">
+                <span class="text-slate-300"><strong>${m.completadas}</strong> / ${m.target} tasks</span>
+                <span>${statusText}</span>
+              </div>
+              <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+                <div class="bg-gradient-to-r from-red-700 to-red-500 h-full rounded-full transition-all duration-700" style="width: ${m.porcentaje}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
