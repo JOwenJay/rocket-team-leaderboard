@@ -8,7 +8,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   
   <style>
-    /* Color base y solución de scroll para móviles */
     body {
       background-color: #020617; 
     }
@@ -45,18 +44,14 @@
     <div class="mb-8">
       <div class="relative bg-slate-800/40 backdrop-blur-xl p-4 md:p-5 rounded-2xl border border-red-500/40 shadow-[0_8px_30px_0_rgba(220,38,38,0.15)] flex items-center gap-4 group hover:bg-slate-800/60 hover:border-red-400/60 transition-all duration-300 overflow-hidden">
         
-        <!-- Reflejo sutil de fondo -->
         <div class="absolute inset-0 bg-gradient-to-r from-red-900/30 via-transparent to-transparent opacity-100 pointer-events-none"></div>
 
-        <!-- Leader Avatar -->
         <div class="relative flex-shrink-0">
           <div class="absolute inset-0 bg-red-600 rounded-full blur-md opacity-30 group-hover:opacity-60 transition-opacity duration-300"></div>
           <img src="https://play.pokemonshowdown.com/sprites/trainers/cynthia.png" alt="Tatiana Gaviria - Boss" class="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-red-500/60 bg-slate-900/90 backdrop-blur-sm object-contain p-1 z-10 shadow-lg">
-          <!-- Corona de Jefe -->
           <div class="absolute -top-2 -right-2 text-2xl drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] z-20">👑</div>
         </div>
 
-        <!-- Leader Info -->
         <div class="relative z-10">
           <p class="font-black text-white text-xl md:text-2xl tracking-wide drop-shadow-md">Tatiana Gaviria</p>
           <div class="flex items-center mt-1">
@@ -77,7 +72,6 @@
         </span>
       </div>
 
-      <!-- Member Rows -->
       <div id="leaderboard" class="space-y-4">
         <p class="text-slate-400 text-center py-8">Loading team data...</p>
       </div>
@@ -100,6 +94,17 @@
       'Dixon Mazo': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/331.png' 
     };
 
+    // Diccionario de fechas de ingreso
+    const HIRE_DATES = {
+      'Owen Jay': 'Sep 4, 2025',
+      'Juan Zarate': 'Oct 6, 2025',
+      'Dixon Mazo': 'Dec 2, 2025',
+      'Alejandro Betancur': 'Sep 4, 2025',
+      'Yesica Pereira': 'Mar 3, 2025',
+      'Natalia Zea': 'Mar 3, 2025',
+      'Felipe Hernandez': 'Sep 15, 2025' // <-- Cámbialo si tienes la fecha real de Felipe
+    };
+
     const DEFAULT_AVATAR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
 
     fetch('datos.csv')
@@ -116,6 +121,22 @@
         document.getElementById('leaderboard').innerHTML = 
           `<p class="text-red-400 text-center py-4">Error loading data. Make sure the CSV file exists.</p>`;
       });
+
+    // Función para mostrar la burbuja (Se oculta sola a los 2.5 segundos)
+    function showCaughtBubble(id) {
+      const bubble = document.getElementById(id);
+      if (!bubble) return;
+      
+      // Mostrar la burbuja
+      bubble.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+      bubble.classList.add('opacity-100', 'translate-y-0');
+
+      // Ocultarla después de 2500 milisegundos (2.5 segundos)
+      setTimeout(() => {
+        bubble.classList.remove('opacity-100', 'translate-y-0');
+        bubble.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+      }, 2500);
+    }
 
     function renderLeaderboard(data) {
       const members = data.map(m => {
@@ -144,14 +165,27 @@
           : `<span class="text-slate-300">Remaining: <strong class="text-white">${m.remaining}</strong></span>`;
 
         const avatarUrl = AVATARS[m.Nombre] || DEFAULT_AVATAR;
+        const caughtDate = HIRE_DATES[m.Nombre] || 'Unknown';
+        const bubbleId = `bubble-${index}`;
 
+        // Añadí 'cursor-pointer' y 'onclick' al contenedor principal de la tarjeta
         container.innerHTML += `
-          <div class="bg-slate-800/20 backdrop-blur-md p-4 rounded-2xl border border-white/5 hover:bg-slate-800/40 hover:border-red-500/30 transition-all duration-300 flex flex-col md:flex-row items-center gap-4 shadow-lg group">
+          <div onclick="showCaughtBubble('${bubbleId}')" class="bg-slate-800/20 backdrop-blur-md p-4 rounded-2xl border border-white/5 hover:bg-slate-800/40 hover:border-red-500/30 transition-all duration-300 flex flex-col md:flex-row items-center gap-4 shadow-lg group cursor-pointer">
             
             <div class="flex items-center gap-3 w-full md:w-[40%]">
               ${rankBadge}
               
+              <!-- Avatar Container relativo para posicionar la burbuja -->
               <div class="relative">
+                
+                <!-- BURBUJA DE DIÁLOGO (Oculta por defecto) -->
+                <div id="${bubbleId}" class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 border border-red-500/50 text-slate-100 text-[10px] px-2 py-1 rounded-md opacity-0 translate-y-2 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 flex items-center gap-1.5 shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+                  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-3 h-3">
+                  Caught on ${caughtDate}
+                  <!-- Triangulito inferior de la burbuja -->
+                  <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-b border-r border-red-500/50 transform rotate-45"></div>
+                </div>
+
                 <div class="absolute inset-0 bg-red-600 rounded-full blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
                 <img src="${avatarUrl}" alt="${m.Nombre}'s Avatar" class="relative w-12 h-12 rounded-full border border-red-900/50 bg-slate-900/50 backdrop-blur-sm object-contain p-0.5 z-10">
               </div>
