@@ -4,18 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Team Rocket - Leaderboard</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PapaParse for CSV reading -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   
   <style>
-    /* Sleek, non-intrusive Team Rocket Background */
+    /* Fondo estilo Team Rocket para que el cristal tenga algo que desenfocar */
     body {
-      background-color: #020617; /* Very dark slate */
+      background-color: #020617; 
       background-image: 
-        radial-gradient(circle at 50% 0%, #3f0000 0%, transparent 60%),
-        radial-gradient(circle at 80% 100%, #1a0000 0%, transparent 50%);
+        radial-gradient(circle at 15% 20%, #4a0000 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, #2a0000 0%, transparent 50%);
       background-attachment: fixed;
     }
   </style>
@@ -24,8 +22,8 @@
 
   <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <header class="flex items-center gap-4 mb-8 border-b-2 border-red-600/80 pb-4">
-      <div class="bg-gradient-to-br from-red-500 to-red-700 text-slate-950 font-black text-5xl w-16 h-16 flex items-center justify-center rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.4)] border border-red-400/50">
+    <header class="flex items-center gap-4 mb-8 pb-4 border-b border-red-900/50">
+      <div class="bg-gradient-to-br from-red-500 to-red-700 text-slate-950 font-black text-5xl w-16 h-16 flex items-center justify-center rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.5)] border border-red-400/50">
         R
       </div>
       <div>
@@ -34,44 +32,41 @@
       </div>
     </header>
 
-    <!-- Leaderboard Container -->
-    <div class="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-2xl">
+    <!-- Leaderboard Container (Efecto Glassmorphism Principal) -->
+    <!-- backdrop-blur-2xl crea el efecto de cristal grueso tipo iOS -->
+    <div class="bg-slate-900/30 backdrop-blur-2xl rounded-3xl p-6 border border-slate-700/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-slate-200">Weekly Performance</h2>
-        <span class="bg-red-950/80 text-red-400 border border-red-800/50 text-xs px-3 py-1 rounded-full font-mono uppercase tracking-wider shadow-[0_0_10px_rgba(220,38,38,0.2)]">
+        <h2 class="text-xl font-bold text-slate-100 drop-shadow">Weekly Performance</h2>
+        <span class="bg-red-950/40 text-red-400 border border-red-800/50 text-xs px-3 py-1 rounded-full font-mono uppercase tracking-wider backdrop-blur-md">
           Active Week
         </span>
       </div>
 
       <!-- Member Rows -->
       <div id="leaderboard" class="space-y-4">
-        <p class="text-slate-500 text-center py-8">Loading team data...</p>
+        <p class="text-slate-400 text-center py-8">Loading team data...</p>
       </div>
     </div>
   </div>
 
   <script>
-    // Weekly Targets (Daily target x 5)
     const TARGETS = {
-      'PA1': 150 * 5, // 750 tasks
-      'PA2': 170 * 5  // 850 tasks
+      'PA1': 150 * 5, 
+      'PA2': 170 * 5  
     };
 
-    // Avatar Dictionary (Direct links to official Pokemon sprites)
     const AVATARS = {
-      'Juan Zarate': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png', // Mewtwo
-      'Alejandro Betancur': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png', // Meowth
-      'Owen Jay': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/202.png', // Wobbuffet
-      'Natalia Zea': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/24.png', // Arbok
-      'Yesica Pereira': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/110.png', // Weezing
-      'Felipe Hernandez': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/336.png', // Seviper
-      'Dixon Mazo': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/331.png' // Cacnea
+      'Juan Zarate': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png', 
+      'Alejandro Betancur': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png', 
+      'Owen Jay': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png', 
+      'Natalia Zea': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/24.png', 
+      'Yesica Pereira': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/336.png', 
+      'Felipe Hernandez': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/202.png', 
+      'Dixon Mazo': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/331.png' 
     };
 
-    // Fallback avatar if someone changes their name or a new member is added
     const DEFAULT_AVATAR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
 
-    // Load local datos.csv
     fetch('datos.csv')
       .then(res => res.text())
       .then(csvText => {
@@ -97,7 +92,6 @@
         return { ...m, target, completed, remaining, percentage };
       });
 
-      // Sort descending by completed tasks
       members.sort((a, b) => b.completed - a.completed);
 
       const container = document.getElementById('leaderboard');
@@ -105,46 +99,43 @@
 
       members.forEach((m, index) => {
         const rank = index + 1;
-        let rankBadge = `<span class="text-slate-500 font-mono font-bold w-6 text-center">#${rank}</span>`;
+        let rankBadge = `<span class="text-slate-400/80 font-mono font-bold w-6 text-center">#${rank}</span>`;
         if (rank === 1) rankBadge = `<span class="text-2xl w-6 text-center drop-shadow-md">🥇</span>`;
         if (rank === 2) rankBadge = `<span class="text-2xl w-6 text-center drop-shadow-md">🥈</span>`;
         if (rank === 3) rankBadge = `<span class="text-2xl w-6 text-center drop-shadow-md">🥉</span>`;
 
         const statusText = m.remaining === 0 
           ? `<span class="text-emerald-400 font-bold drop-shadow-[0_0_5px_rgba(52,211,153,0.4)]">Target Reached! 🎉</span>`
-          : `<span class="text-slate-400">Remaining: <strong class="text-slate-200">${m.remaining}</strong></span>`;
+          : `<span class="text-slate-300">Remaining: <strong class="text-white">${m.remaining}</strong></span>`;
 
-        // Get the avatar URL from our dictionary, or use the default Poke-ball
         const avatarUrl = AVATARS[m.Nombre] || DEFAULT_AVATAR;
 
+        // Tarjetas individuales con efecto Glass (bg-slate-800/20 y backdrop-blur-md)
         container.innerHTML += `
-          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 hover:border-red-500/50 hover:bg-slate-800/80 transition-all duration-300 flex flex-col md:flex-row items-center gap-4 shadow-lg group">
+          <div class="bg-slate-800/20 backdrop-blur-md p-4 rounded-2xl border border-white/5 hover:bg-slate-800/40 hover:border-red-500/30 transition-all duration-300 flex flex-col md:flex-row items-center gap-4 shadow-lg group">
             
-            <!-- Rank & Avatar Section -->
             <div class="flex items-center gap-3 w-full md:w-[40%]">
               ${rankBadge}
               
-              <!-- Character Avatar -->
               <div class="relative">
                 <div class="absolute inset-0 bg-red-600 rounded-full blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
-                <img src="${avatarUrl}" alt="${m.Nombre}'s Avatar" class="relative w-12 h-12 rounded-full border-2 border-red-900/80 bg-slate-950 object-contain p-0.5 z-10">
+                <img src="${avatarUrl}" alt="${m.Nombre}'s Avatar" class="relative w-12 h-12 rounded-full border border-red-900/50 bg-slate-900/50 backdrop-blur-sm object-contain p-0.5 z-10">
               </div>
 
               <div>
                 <p class="font-bold text-slate-100 text-lg tracking-wide">${m.Nombre}</p>
-                <span class="text-[10px] font-mono bg-slate-950 text-red-400 px-2 py-0.5 rounded border border-red-900/50 uppercase">${m.Rol} AGENT</span>
+                <span class="text-[10px] font-mono bg-slate-950/50 text-red-400 px-2 py-0.5 rounded-md border border-white/5 uppercase backdrop-blur-sm">${m.Rol} AGENT</span>
               </div>
             </div>
 
-            <!-- Progress Bar Section -->
             <div class="w-full md:w-[60%] space-y-2">
               <div class="flex justify-between text-xs md:text-sm">
                 <span class="text-slate-300 font-medium"><strong class="text-white text-base">${m.completed}</strong> / ${m.target} tasks</span>
                 <span>${statusText}</span>
               </div>
-              <div class="w-full bg-slate-950 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-800 shadow-inner">
-                <div class="bg-gradient-to-r from-red-800 via-red-600 to-red-500 h-full rounded-full transition-all duration-1000 ease-out relative" style="width: ${m.percentage}%">
-                  <!-- Glossy effect on the bar -->
+              <!-- Barra de progreso ajustada al estilo cristal -->
+              <div class="w-full bg-slate-950/50 backdrop-blur-sm h-3.5 rounded-full overflow-hidden p-0.5 border border-white/5 shadow-inner">
+                <div class="bg-gradient-to-r from-red-800 via-red-600 to-red-500 h-full rounded-full transition-all duration-1000 ease-out relative shadow-[0_0_10px_rgba(220,38,38,0.5)]" style="width: ${m.percentage}%">
                   <div class="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full"></div>
                 </div>
               </div>
