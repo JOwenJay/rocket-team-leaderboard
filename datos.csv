@@ -1,8 +1,8 @@
-Nombre,Rol,TasksCompletadas
-Juan Zarate,PA1,180
-Alejandro Betancur,PA1,180
-Owen Jay,PA2,175
-Natalia Zea,PA2,150
-Yesica Pereira,PA2,162
-Felipe Hernandez,PA2,132
-Dixon Mazo,PA1,173
+Nombre,Rol,TasksCompletadas,HorasProyecto
+Juan Zarate,PA1,180,5
+Alejandro Betancur,PA1,180,2.5
+Owen Jay,PA2,175,4
+Natalia Zea,PA2,150,0
+Yesica Pereira,PA2,162,3
+Felipe Hernandez,PA2,132,1.5
+Dixon Mazo,PA1,173,6
