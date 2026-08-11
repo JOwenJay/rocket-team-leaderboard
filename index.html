@@ -94,7 +94,6 @@
       'Dixon Mazo': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/331.png' 
     };
 
-    // Diccionario de fechas de ingreso
     const HIRE_DATES = {
       'Owen Jay': 'Sep 4, 2025',
       'Juan Zarate': 'Oct 6, 2025',
@@ -102,7 +101,7 @@
       'Alejandro Betancur': 'Sep 4, 2025',
       'Yesica Pereira': 'Mar 3, 2025',
       'Natalia Zea': 'Mar 3, 2025',
-      'Felipe Hernandez': 'Sep 15, 2025' // <-- Cámbialo si tienes la fecha real de Felipe
+      'Felipe Hernandez': 'Sep 15, 2025'
     };
 
     const DEFAULT_AVATAR = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
@@ -122,16 +121,13 @@
           `<p class="text-red-400 text-center py-4">Error loading data. Make sure the CSV file exists.</p>`;
       });
 
-    // Función para mostrar la burbuja (Se oculta sola a los 2.5 segundos)
     function showCaughtBubble(id) {
       const bubble = document.getElementById(id);
       if (!bubble) return;
       
-      // Mostrar la burbuja
       bubble.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
       bubble.classList.add('opacity-100', 'translate-y-0');
 
-      // Ocultarla después de 2500 milisegundos (2.5 segundos)
       setTimeout(() => {
         bubble.classList.remove('opacity-100', 'translate-y-0');
         bubble.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
@@ -142,10 +138,12 @@
       const members = data.map(m => {
         const target = TARGETS[m.Rol] || 750;
         const completed = m.TasksCompletadas || 0;
+        // Obtenemos las horas de proyecto (si no hay dato en el CSV, pone 0)
+        const horas = m.HorasProyecto || 0; 
         const remaining = Math.max(0, target - completed);
         const percentage = Math.min(100, Math.round((completed / target) * 100));
 
-        return { ...m, target, completed, remaining, percentage };
+        return { ...m, target, completed, remaining, percentage, horas };
       });
 
       members.sort((a, b) => b.completed - a.completed);
@@ -168,21 +166,16 @@
         const caughtDate = HIRE_DATES[m.Nombre] || 'Unknown';
         const bubbleId = `bubble-${index}`;
 
-        // Añadí 'cursor-pointer' y 'onclick' al contenedor principal de la tarjeta
         container.innerHTML += `
           <div onclick="showCaughtBubble('${bubbleId}')" class="bg-slate-800/20 backdrop-blur-md p-4 rounded-2xl border border-white/5 hover:bg-slate-800/40 hover:border-red-500/30 transition-all duration-300 flex flex-col md:flex-row items-center gap-4 shadow-lg group cursor-pointer">
             
-            <div class="flex items-center gap-3 w-full md:w-[40%]">
+            <div class="flex items-center gap-3 w-full md:w-[45%]">
               ${rankBadge}
               
-              <!-- Avatar Container relativo para posicionar la burbuja -->
               <div class="relative">
-                
-                <!-- BURBUJA DE DIÁLOGO (Oculta por defecto) -->
                 <div id="${bubbleId}" class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 border border-red-500/50 text-slate-100 text-[10px] px-2 py-1 rounded-md opacity-0 translate-y-2 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 flex items-center gap-1.5 shadow-[0_0_15px_rgba(220,38,38,0.4)]">
                   <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-3 h-3">
                   Caught on ${caughtDate}
-                  <!-- Triangulito inferior de la burbuja -->
                   <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-b border-r border-red-500/50 transform rotate-45"></div>
                 </div>
 
@@ -192,11 +185,17 @@
 
               <div>
                 <p class="font-bold text-slate-100 text-lg tracking-wide">${m.Nombre}</p>
-                <span class="text-[10px] font-mono bg-slate-950/50 text-red-400 px-2 py-0.5 rounded-md border border-white/5 uppercase backdrop-blur-sm">${m.Rol} AGENT</span>
+                <!-- Contenedor de Insignias (Rol + Horas Proyecto) -->
+                <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                  <span class="text-[10px] font-mono bg-slate-950/50 text-red-400 px-2 py-0.5 rounded-md border border-white/5 uppercase backdrop-blur-sm">${m.Rol} AGENT</span>
+                  <span class="text-[10px] font-mono bg-slate-950/50 text-amber-400 px-2 py-0.5 rounded-md border border-amber-900/50 uppercase backdrop-blur-sm flex items-center gap-1 shadow-inner">
+                    ⏱️ ${m.horas}H PROJ
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div class="w-full md:w-[60%] space-y-2">
+            <div class="w-full md:w-[55%] space-y-2">
               <div class="flex justify-between text-xs md:text-sm">
                 <span class="text-slate-300 font-medium"><strong class="text-white text-base">${m.completed}</strong> / ${m.target} tasks</span>
                 <span>${statusText}</span>
